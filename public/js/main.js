@@ -306,7 +306,7 @@ function loadTrack(i, autoplay) {
 }
 
 audio.addEventListener('loadedmetadata', () => {
-  durEl.textContent = fmtTime(audio.duration);
+  if (durEl) durEl.textContent = fmtTime(audio.duration);
 });
 
 audio.addEventListener('timeupdate', () => {

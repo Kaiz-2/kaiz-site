@@ -45,6 +45,8 @@
 </head>
 <body>
 
+  <a class="skip-link" href="#home" data-i18n="skip_link">Skip to content</a>
+
   <div id="intro" class="intro" role="dialog" aria-label="Welcome">
     <div class="intro-cat" id="intro-cat" aria-hidden="true">😼</div>
     <p class="intro-q" id="intro-q1">Which language do you want?</p>
@@ -80,7 +82,12 @@
           <button class="lang-btn" type="button" data-lang="es">ES</button>
         </li>
         <li class="theme-toggle">
-          <button class="theme-btn" type="button" aria-label="Cambiar tema" data-theme-btn>☀</button>
+          <button class="theme-btn" type="button" data-i18n-aria="aria_theme" aria-label="Toggle theme" data-theme-btn>☀</button>
+        </li>
+        <li class="cmdk-hint-wrap">
+          <button class="cmdk-hint mono" type="button" data-i18n-aria="aria_cmdk" aria-label="Open command palette" data-cmdk-open>
+            <kbd>⌘</kbd><kbd>K</kbd>
+          </button>
         </li>
       </ul>
     </nav>
@@ -235,6 +242,10 @@
         </p>
         <p class="contact-email">
           <a class="mailto" href="mailto:kizzyrnam@gmail.com">kizzyrnam@gmail.com</a>
+          <button class="copy-btn mono" type="button" data-copy="kizzyrnam@gmail.com" data-i18n-aria="aria_copy" aria-label="Copy email address">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span class="copy-label" data-i18n="copy_label">Copy</span>
+          </button>
         </p>
         <div class="contact-socials">
           <a class="social-card" href="https://github.com/Kaiz-2" target="_blank" rel="noopener">
@@ -270,7 +281,7 @@
 
   <button id="to-top" class="to-top mono" aria-label="Back to top">↑</button>
 
-  <div class="player" id="player" aria-label="Reproductor de musica">
+  <div class="player" id="player" role="group" data-i18n-aria="aria_player" aria-label="Music player">
     <button class="player-btn" type="button" aria-label="Play / Pause" data-player-play>
       <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
       <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
@@ -290,16 +301,41 @@
           <span class="player-vol-val" id="player-vol-val">30%</span>
         </div>
       </div>
-      <button class="player-btn" type="button" aria-label="Anterior" data-player-prev>
+      <button class="player-btn" type="button" data-i18n-aria="aria_prev" aria-label="Previous track" data-player-prev>
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 6h2v12H7zM20 6v12L9 12z"/></svg>
       </button>
-      <span class="player-time mono" id="player-cur">0:00</span>
-      <button class="player-btn" type="button" aria-label="Siguiente" data-player-next>
+      <span class="player-time mono">
+        <span id="player-cur">0:00</span><span class="player-time-sep">/</span><span id="player-dur">0:00</span>
+      </span>
+      <button class="player-btn" type="button" data-i18n-aria="aria_next" aria-label="Next track" data-player-next>
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15 6h2v12h-2zM4 6v12l11-6z"/></svg>
       </button>
     </div>
     <audio id="player-audio" preload="metadata"></audio>
   </div>
+
+  <div class="cmdk" id="cmdk" role="dialog" aria-modal="true" aria-labelledby="cmdk-label" hidden>
+    <div class="cmdk-backdrop" data-cmdk-close></div>
+    <div class="cmdk-panel" role="document">
+      <h2 class="sr-only" id="cmdk-label" data-i18n="cmdk_title">Command palette</h2>
+      <div class="cmdk-field">
+        <span class="cmdk-prompt mono accent" aria-hidden="true">&gt;</span>
+        <input class="cmdk-input mono" id="cmdk-input" type="text" autocomplete="off" spellcheck="false"
+               role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list"
+               data-i18n-ph="cmdk_placeholder" placeholder="Type a command or search…" />
+        <kbd class="cmdk-esc mono">ESC</kbd>
+      </div>
+      <ul class="cmdk-list" id="cmdk-list" role="listbox" aria-labelledby="cmdk-label"></ul>
+      <p class="cmdk-empty mono" id="cmdk-empty" data-i18n="cmdk_empty" hidden>No results</p>
+      <div class="cmdk-foot mono">
+        <span><kbd>↑</kbd><kbd>↓</kbd> <span data-i18n="cmdk_nav">navigate</span></span>
+        <span><kbd>↵</kbd> <span data-i18n="cmdk_run">run</span></span>
+        <span><kbd>esc</kbd> <span data-i18n="cmdk_close">close</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast mono" id="toast" role="status" aria-live="polite"></div>
 
   <script src="js/main.js"></script>
 </body>

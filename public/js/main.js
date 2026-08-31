@@ -47,7 +47,38 @@ const strings = {
     proj2_btn: 'Use Template <span class="btn-arrow" aria-hidden="true">↗</span>',
     contact_label: 'Contact',
     contact_title: 'Let\'s <span class="underline-link">talk</span>.',
-    contact_sub: "Got an idea for a bot, a project or a security problem? I'm usually around."
+    contact_sub: "Got an idea for a bot, a project or a security problem? I'm usually around.",
+    skip_link: 'Skip to content',
+    copy_label: 'Copy',
+    copy_done: 'Email copied to clipboard',
+    copy_fail: 'Could not copy — select it manually',
+    cmdk_title: 'Command palette',
+    cmdk_placeholder: 'Type a command or search…',
+    cmdk_empty: 'No results',
+    cmdk_nav: 'navigate',
+    cmdk_run: 'run',
+    cmdk_close: 'close',
+    cmdk_g_nav: 'Go to',
+    cmdk_g_actions: 'Actions',
+    cmdk_g_links: 'Links',
+    cmd_theme_dark: 'Switch to dark theme',
+    cmd_theme_light: 'Switch to light theme',
+    cmd_lang_es: 'Switch language to Spanish',
+    cmd_lang_en: 'Switch language to English',
+    cmd_copy: 'Copy email address',
+    cmd_play: 'Play music',
+    cmd_pause: 'Pause music',
+    cmd_gh: 'GitHub profile',
+    cmd_dc: 'Discord',
+    cmd_ig: 'Instagram',
+    cmd_repo_music: 'Repo — Music bot template',
+    cmd_repo_sec: 'Repo — Security bot template',
+    aria_theme: 'Toggle theme',
+    aria_cmdk: 'Open command palette',
+    aria_copy: 'Copy email address',
+    aria_player: 'Music player',
+    aria_prev: 'Previous track',
+    aria_next: 'Next track'
   },
   es: {
     title: 'Kaiz — Informática y Ciberseguridad',
@@ -97,7 +128,38 @@ const strings = {
     proj2_btn: 'Usar plantilla <span class="btn-arrow" aria-hidden="true">↗</span>',
     contact_label: 'Contacto',
     contact_title: 'Hablemos<span class="underline-link">.</span>',
-    contact_sub: '¿Se te ocurre un bot, un proyecto o un problema de seguridad? Suelo estar por aquí.'
+    contact_sub: '¿Se te ocurre un bot, un proyecto o un problema de seguridad? Suelo estar por aquí.',
+    skip_link: 'Saltar al contenido',
+    copy_label: 'Copiar',
+    copy_done: 'Email copiado al portapapeles',
+    copy_fail: 'No se pudo copiar — selecciónalo a mano',
+    cmdk_title: 'Paleta de comandos',
+    cmdk_placeholder: 'Escribe un comando o busca…',
+    cmdk_empty: 'Sin resultados',
+    cmdk_nav: 'moverse',
+    cmdk_run: 'ejecutar',
+    cmdk_close: 'cerrar',
+    cmdk_g_nav: 'Ir a',
+    cmdk_g_actions: 'Acciones',
+    cmdk_g_links: 'Enlaces',
+    cmd_theme_dark: 'Cambiar a tema oscuro',
+    cmd_theme_light: 'Cambiar a tema claro',
+    cmd_lang_es: 'Cambiar idioma a español',
+    cmd_lang_en: 'Cambiar idioma a inglés',
+    cmd_copy: 'Copiar dirección de email',
+    cmd_play: 'Reproducir música',
+    cmd_pause: 'Pausar música',
+    cmd_gh: 'Perfil de GitHub',
+    cmd_dc: 'Discord',
+    cmd_ig: 'Instagram',
+    cmd_repo_music: 'Repo — Plantilla bot de música',
+    cmd_repo_sec: 'Repo — Plantilla bot de seguridad',
+    aria_theme: 'Cambiar tema',
+    aria_cmdk: 'Abrir paleta de comandos',
+    aria_copy: 'Copiar dirección de email',
+    aria_player: 'Reproductor de música',
+    aria_prev: 'Pista anterior',
+    aria_next: 'Pista siguiente'
   }
 };
 
@@ -115,8 +177,14 @@ const playlists = {
 };
 
 let tracks = playlists.en;
+let currentLang = 'en';
+
+function t(key) {
+  return strings[currentLang][key] || strings.en[key] || key;
+}
 
 function applyLang(lang) {
+  currentLang = lang;
   document.documentElement.lang = lang;
   const dict = strings[lang];
   document.querySelectorAll('[data-i18n]').forEach((el) => {
@@ -130,6 +198,14 @@ function applyLang(lang) {
     } else {
       el.innerHTML = val;
     }
+  });
+  document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+    const val = dict[el.getAttribute('data-i18n-aria')];
+    if (val !== undefined) el.setAttribute('aria-label', val);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach((el) => {
+    const val = dict[el.getAttribute('data-i18n-ph')];
+    if (val !== undefined) el.setAttribute('placeholder', val);
   });
   document.querySelectorAll('.lang-btn').forEach((b) => {
     b.classList.toggle('active', b.dataset.lang === lang);
@@ -382,5 +458,268 @@ if (introEl) {
     else playerEl.style.display = 'none';
     introEl.classList.add('hide');
     setTimeout(() => { introEl.style.display = 'none'; }, 400);
+  });
+}
+/* ---------- toast ---------- */
+
+const toastEl = document.getElementById('toast');
+let toastTimer;
+
+function toast(message) {
+  if (!toastEl) return;
+  toastEl.textContent = message;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+}
+
+/* ---------- copy to clipboard ---------- */
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    // The Clipboard API needs a secure context; fall back to a temporary selection.
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    } catch (e2) {
+      return false;
+    }
+  }
+}
+
+document.querySelectorAll('[data-copy]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const ok = await copyText(btn.dataset.copy);
+    toast(t(ok ? 'copy_done' : 'copy_fail'));
+    if (!ok) return;
+    btn.classList.add('done');
+    setTimeout(() => btn.classList.remove('done'), 1600);
+  });
+});
+
+/* ---------- command palette ---------- */
+
+const cmdk = document.getElementById('cmdk');
+const cmdkInput = document.getElementById('cmdk-input');
+const cmdkList = document.getElementById('cmdk-list');
+const cmdkEmpty = document.getElementById('cmdk-empty');
+
+if (cmdk && cmdkInput && cmdkList) {
+  let items = [];
+  let active = 0;
+  let lastFocus = null;
+
+  const go = (hash) => () => {
+    const target = document.querySelector(hash);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    history.replaceState(null, '', hash);
+  };
+
+  const openUrl = (url) => () => window.open(url, '_blank', 'noopener');
+
+  function commands() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const playing = audio && !audio.paused;
+    return [
+      { group: 'cmdk_g_nav', icon: '→', key: 'nav_home', run: go('#home') },
+      { group: 'cmdk_g_nav', icon: '→', key: 'nav_about', run: go('#about') },
+      { group: 'cmdk_g_nav', icon: '→', key: 'nav_skills', run: go('#skills') },
+      { group: 'cmdk_g_nav', icon: '→', key: 'nav_projects', run: go('#projects') },
+      { group: 'cmdk_g_nav', icon: '→', key: 'nav_contact', run: go('#contact') },
+      {
+        group: 'cmdk_g_actions',
+        icon: isLight ? '☾' : '☀',
+        key: isLight ? 'cmd_theme_dark' : 'cmd_theme_light',
+        run: () => applyTheme(isLight ? 'dark' : 'light')
+      },
+      {
+        group: 'cmdk_g_actions',
+        icon: '文',
+        key: currentLang === 'en' ? 'cmd_lang_es' : 'cmd_lang_en',
+        run: () => {
+          applyLang(currentLang === 'en' ? 'es' : 'en');
+          if (playerEl) loadTrack(0, false);
+        }
+      },
+      {
+        group: 'cmdk_g_actions',
+        icon: '⧉',
+        key: 'cmd_copy',
+        hint: 'kizzyrnam@gmail.com',
+        run: async () => {
+          const ok = await copyText('kizzyrnam@gmail.com');
+          toast(t(ok ? 'copy_done' : 'copy_fail'));
+        }
+      },
+      {
+        group: 'cmdk_g_actions',
+        icon: playing ? '❚❚' : '▶',
+        key: playing ? 'cmd_pause' : 'cmd_play',
+        run: () => {
+          if (!audio) return;
+          if (!audio.src) loadTrack(0, false);
+          if (audio.paused) audio.play().catch(() => {});
+          else audio.pause();
+        }
+      },
+      { group: 'cmdk_g_links', icon: '↗', key: 'cmd_gh', hint: '@Kaiz-2', run: openUrl('https://github.com/Kaiz-2') },
+      { group: 'cmdk_g_links', icon: '↗', key: 'cmd_dc', hint: '@kaiz', run: openUrl('https://discord.com/users/614478789241470986') },
+      { group: 'cmdk_g_links', icon: '↗', key: 'cmd_ig', hint: '@rxlxx2', run: openUrl('https://instagram.com/rxlxx2') },
+      { group: 'cmdk_g_links', icon: '↗', key: 'cmd_repo_music', run: openUrl('https://github.com/Kaiz-2/discord-music-template') },
+      { group: 'cmdk_g_links', icon: '↗', key: 'cmd_repo_sec', run: openUrl('https://github.com/Kaiz-2/discord-security-template') }
+    ];
+  }
+
+  // Case- and accent-insensitive so "musica" still matches "música".
+  const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+  function render() {
+    const q = norm(cmdkInput.value.trim());
+    items = commands()
+      .map((c) => ({ ...c, label: t(c.key) }))
+      .filter((c) => !q || norm(c.label).includes(q) || norm(t(c.group)).includes(q));
+
+    if (active >= items.length) active = Math.max(0, items.length - 1);
+
+    cmdkList.innerHTML = '';
+    let lastGroup = null;
+    items.forEach((c, i) => {
+      if (c.group !== lastGroup) {
+        lastGroup = c.group;
+        const h = document.createElement('li');
+        h.className = 'cmdk-group';
+        h.setAttribute('role', 'presentation');
+        h.textContent = t(c.group);
+        cmdkList.appendChild(h);
+      }
+      const li = document.createElement('li');
+      li.className = 'cmdk-item';
+      li.id = 'cmdk-item-' + i;
+      li.setAttribute('role', 'option');
+      li.setAttribute('aria-selected', String(i === active));
+      const icon = document.createElement('span');
+      icon.className = 'cmdk-item-icon';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.textContent = c.icon;
+      const label = document.createElement('span');
+      label.className = 'cmdk-item-label';
+      label.textContent = c.label;
+      li.append(icon, label);
+      if (c.hint) {
+        const hint = document.createElement('span');
+        hint.className = 'cmdk-item-hint';
+        hint.textContent = c.hint;
+        li.appendChild(hint);
+      }
+      li.addEventListener('click', () => runItem(i));
+      li.addEventListener('mousemove', () => setActive(i));
+      cmdkList.appendChild(li);
+    });
+
+    cmdkEmpty.hidden = items.length > 0;
+    syncActive();
+  }
+
+  function syncActive() {
+    const nodes = cmdkList.querySelectorAll('.cmdk-item');
+    nodes.forEach((el, i) => el.setAttribute('aria-selected', String(i === active)));
+    const el = nodes[active];
+    // On the first item, pin the list to the top so its group heading stays visible.
+    if (active === 0) cmdkList.scrollTop = 0;
+    else if (el) el.scrollIntoView({ block: 'nearest' });
+    cmdkInput.setAttribute('aria-activedescendant', el ? el.id : '');
+  }
+
+  function setActive(i) {
+    if (i === active) return;
+    active = i;
+    syncActive();
+  }
+
+  function runItem(i) {
+    const c = items[i];
+    if (!c) return;
+    closePalette();
+    c.run();
+  }
+
+  function openPalette() {
+    if (!cmdk.hidden) return;
+    lastFocus = document.activeElement;
+    cmdk.hidden = false;
+    cmdkInput.value = '';
+    active = 0;
+    render();
+    cmdkInput.focus();
+  }
+
+  function closePalette() {
+    if (cmdk.hidden) return;
+    cmdk.hidden = true;
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  cmdkInput.addEventListener('input', () => {
+    active = 0;
+    render();
+  });
+
+  cmdk.querySelectorAll('[data-cmdk-close]').forEach((el) => {
+    el.addEventListener('click', closePalette);
+  });
+
+  document.querySelectorAll('[data-cmdk-open]').forEach((el) => {
+    el.addEventListener('click', openPalette);
+  });
+
+  cmdk.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closePalette();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (items.length) setActive((active + 1) % items.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (items.length) setActive((active - 1 + items.length) % items.length);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActive(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActive(Math.max(0, items.length - 1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      runItem(active);
+    } else if (e.key === 'Tab') {
+      // Trap focus: the dialog only has one focusable control.
+      e.preventDefault();
+    }
+  });
+
+  const isTyping = (el) =>
+    !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (cmdk.hidden) openPalette();
+      else closePalette();
+      return;
+    }
+    if (cmdk.hidden && e.key === '/' && !isTyping(document.activeElement)) {
+      e.preventDefault();
+      openPalette();
+    }
   });
 }
